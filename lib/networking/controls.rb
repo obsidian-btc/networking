@@ -1,3 +1,5 @@
+require 'networking/controls/data'
 require 'networking/controls/io'
 require 'networking/controls/io/scenarios'
 require 'networking/controls/scheduler/cooperative/dispatcher'
+require 'networking/controls/scheduler/cooperative/fiber'

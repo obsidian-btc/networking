@@ -7,6 +7,19 @@ module Networking
         end
       end
 
+      module Reading
+        def self.example(data=nil)
+          data ||= Data.example
+          StringIO.new data
+        end
+      end
+
+      module Writing
+        def self.example
+          StringIO.new
+        end
+      end
+
       module Timeout
         def self.example
           10
