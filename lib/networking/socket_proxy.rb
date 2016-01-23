@@ -42,7 +42,7 @@ module Networking
 
       read_size = bytes || read_buffer_size
 
-      logger.trace "Reading (Bytes Requested: #{bytes.inspect}, Fileno: #{fileno})"
+      logger.trace "Reading (Bytes Requested: #{bytes}, Fileno: #{fileno})"
 
       loop do
         logger.trace "Reading chunk (Max Size: #{read_size}, Fileno: #{fileno})"
@@ -55,7 +55,7 @@ module Networking
           scheduler.wait_readable io
           next
         when nil then
-          logger.debug "Read finished (Bytes Requested: #{bytes.inspect}, Fileno: #{fileno}, Bytes Read: #{outbuf.bytesize})"
+          logger.debug "Read finished (Bytes Requested: #{bytes}, Fileno: #{fileno}, Bytes Read: #{outbuf.bytesize})"
           break
         else
           logger.debug "Finished reading chunk (Max Size: #{read_size}, Fileno: #{fileno}, Bytes Read: #{data.bytesize})"
@@ -70,22 +70,26 @@ module Networking
       outbuf
     end
 
-    def self.default_read_buffer_size
-      8192
+    def write(data)
+      logger.trace "Writing (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
+      logger.data data
+
+      loop do
+        bytes_written = socket.write_nonblock data, :exception => false
+
+        if bytes_written == :wait_writable
+          logger.debug "Deferring write; write would block (Fileno: #{fileno})"
+          scheduler.wait_writable io
+          next
+        end
+
+        logger.debug "Written (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
+        return bytes_written
+      end
     end
 
-    module Assertions
-      def reads_scheduled(io=nil)
-        scheduler.sink.records.select do |record|
-          next unless record.signal == :read_scheduled
-
-          if io
-            record.data == io
-          else
-            true
-          end
-        end
-      end
+    def self.default_read_buffer_size
+      8192
     end
   end
 end
