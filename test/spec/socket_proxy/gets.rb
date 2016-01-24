@@ -3,7 +3,7 @@ require_relative './socket_proxy_spec_init'
 context 'Socket Proxy' do
   assert $INPUT_RECORD_SEPARATOR == "\n"
 
-  context 'gets (reading a line of text)' do
+  context 'Reading a line of text (gets)' do
     test do
       data = Networking::Controls::Data::PlainText::MultipleLines.example
       first_line = data.each_line.first
@@ -111,7 +111,7 @@ context 'Socket Proxy' do
       assert output == data
     end
 
-    test 'At end of file' do
+    test 'After remote connection is closed' do
       data = Networking::Controls::Data::PlainText::SingleLine.example
       dispatcher = Networking::Controls::Scheduler::Cooperative::Dispatcher.new
       scheduler = Networking::Scheduler::Cooperative.build dispatcher
@@ -133,6 +133,32 @@ context 'Socket Proxy' do
       end
 
       assert output.nil?
+    end
+  end
+
+  context 'readline variation' do
+    test do
+      data = Networking::Controls::Data::PlainText::SingleLine.example
+      io = Networking::Controls::IO::Reading.example data
+
+      socket_proxy = Networking::SocketProxy.build io
+
+      output = socket_proxy.readline
+
+      assert output == data
+    end
+
+    test 'EOFError is raised after remote connection is closed' do
+      io = StringIO.new
+
+      socket_proxy = Networking::SocketProxy.build io
+
+      begin
+        socket_proxy.readline
+      rescue EOFError => error
+      end
+
+      assert error
     end
   end
 end

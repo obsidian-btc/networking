@@ -106,6 +106,12 @@ module Networking
       outbuf
     end
 
+    def readline(*arguments)
+      result = gets *arguments
+      raise EOFError if result.nil?
+      result
+    end
+
     def write(data)
       logger.trace "Writing (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
       logger.data data
