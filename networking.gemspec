@@ -17,11 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'clock'
   s.add_runtime_dependency 'controls'
-  s.add_runtime_dependency 'telemetry'
   s.add_runtime_dependency 'telemetry-logger'
 
-  s.add_development_dependency 'benchmark-ips'
-  s.add_development_dependency 'process_host'
-  s.add_development_dependency 'runner'
   s.add_development_dependency 'test_bench'
 end

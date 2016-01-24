@@ -6,9 +6,7 @@ puts RUBY_DESCRIPTION
 
 require_relative '../init.rb'
 
-require 'process_host'
 require 'test_bench'; TestBench.activate
-require 'runner'
 
 require 'networking/controls'
 

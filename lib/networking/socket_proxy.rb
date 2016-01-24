@@ -36,6 +36,42 @@ module Networking
       Fileno.get io
     end
 
+    def gets(separator_or_limit=$INPUT_RECORD_SEPARATOR, limit=nil)
+      logger.trace "Reading Line (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno})"
+
+      line = nil
+
+      loop do
+        character = socket.read_nonblock 1, :exception => false
+
+        if character == :wait_readable
+          logger.debug "Deferring gets; read would block (Fileno: #{fileno})"
+          scheduler.wait_readable io
+          next
+        elsif character.nil?
+          break
+        end
+
+        socket.ungetc character
+
+        if limit.nil?
+          line = socket.gets separator_or_limit
+        else
+          line = socket.gets separator_or_limit, limit
+        end
+        break
+      end
+
+      if line
+        logger.debug "Read line (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno}, Bytes: #{line.bytesize})"
+        logger.data line
+      else
+        logger.debug "Did not dead line; EOF reached (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno})"
+      end
+
+      line
+    end
+
     def read(bytes=nil, outbuf=nil)
       outbuf ||= String.new
       outbuf.clear

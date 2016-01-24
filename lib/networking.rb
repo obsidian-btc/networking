@@ -1,8 +1,8 @@
+require 'English'
 require 'fiber'
 require 'socket'
 require 'stringio'
 
-require 'telemetry'
 require 'telemetry/logger'
 
 require 'networking/fileno'
