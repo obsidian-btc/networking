@@ -1,5 +1,6 @@
 require 'English'
 require 'fiber'
+require 'openssl'
 require 'socket'
 require 'stringio'
 
