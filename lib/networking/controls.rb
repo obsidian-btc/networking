@@ -1,5 +1,8 @@
 require 'networking/controls/data'
+require 'networking/controls/host'
 require 'networking/controls/io'
 require 'networking/controls/io/scenarios'
+require 'networking/controls/port'
 require 'networking/controls/scheduler/cooperative/dispatcher'
 require 'networking/controls/scheduler/cooperative/fiber'
+require 'networking/controls/test_server'

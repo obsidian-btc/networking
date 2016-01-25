@@ -32,6 +32,14 @@ module Networking
       instance
     end
 
+    def close
+      socket.close
+    end
+
+    def closed?
+      socket.closed?
+    end
+
     def fileno
       Fileno.get io
     end

@@ -5,6 +5,8 @@ require 'stringio'
 
 require 'telemetry/logger'
 
+require 'networking/connection/client'
+require 'networking/connection/client/reconnect_policy'
 require 'networking/fileno'
 require 'networking/scheduler'
 require 'networking/scheduler/blocking'
