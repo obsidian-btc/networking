@@ -5,95 +5,108 @@ module Networking
       attr_reader :port
       attr_reader :reconnect_policy
       attr_reader :scheduler
-      attr_reader :ssl_context
+      attr_writer :socket
 
       dependency :logger, Telemetry::Logger
 
-      def initialize(host, port, reconnect_policy, scheduler, ssl_context)
+      def initialize(host, port, reconnect_policy, scheduler)
         @host = host
         @port = port
         @reconnect_policy = reconnect_policy
         @scheduler = scheduler
-        @ssl_context = ssl_context
       end
 
-      def self.build(host, port, reconnect_policy: nil, scheduler: nil, ssl_context: nil)
+      def self.build(host, port, reconnect_policy: nil, scheduler: nil, ssl: nil)
         reconnect_policy ||= :never
         reconnect_policy = ReconnectPolicy.get reconnect_policy
 
         scheduler ||= Scheduler::Blocking.build
 
-        instance = new host, port, reconnect_policy, scheduler, ssl_context
+        if ssl
+          instance = SSL.new host, port, reconnect_policy, scheduler
+          instance.ssl_context = ssl if ssl.is_a? OpenSSL::SSL::SSLContext
+          instance.ssl_context.verify_mode
+        else
+          instance = NonSSL.new host, port, reconnect_policy, scheduler
+        end
+
         Telemetry::Logger.configure instance
         instance
       end
 
+      def build_socket_proxy
+        logger.trace "Establishing connection (Host: #{host.inspect}, Port: #{port})"
+
+        socket = establish_connection
+
+        logger.debug "Established connection (Host: #{host.inspect}, Port: #{port})"
+
+        SocketProxy.build socket, scheduler
+      end
+
       def close
-        socket.close
+        connected do
+          socket.close
+        end
       end
 
       def closed?
-        socket.closed?
+        connected do
+          socket.closed?
+        end
+      end
+
+      def connected(&block)
+        if socket
+          reconnect if reconnect_policy.reconnect? socket
+        end
+
+        block.(socket)
       end
 
       def gets(*arguments)
-        socket.gets *arguments
+        connected do
+          socket.gets *arguments
+        end
       end
 
       def establish_connection
-        logger.trace "Establishing connection (Host: #{host.inspect}, Port: #{port})"
-
-        socket = TCPSocket.new host, port
-        if ssl_context
-          logger.trace "Enabling SSL (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
-          raw_socket = socket
-          socket = OpenSSL::SSL::SSLSocket.new raw_socket, ssl_context
-
-          loop do
-            result = socket.connect_nonblock :exception => false
-            if result == :wait_readable
-              logger.trace "Not ready for SSL handshake; deferring (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
-              scheduler.wait_readable raw_socket
-              logger.debug "Ready for SSL handshake (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
-              next
-            end
-            break
-          end
-
-          logger.debug "SSL enabled (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
-        end
-        socket_proxy = SocketProxy.build socket, scheduler
-
-        logger.trace "Established connection (Host: #{host.inspect}, Port: #{port})"
-
-        socket_proxy
+        fail
       end
 
       def read(*arguments)
-        socket.read *arguments
+        connected do
+          socket.read *arguments
+        end
       end
 
       def readline(*arguments)
-        socket.readline *arguments
+        connected do
+          socket.readline *arguments
+        end
+      end
+
+      def reconnect
+        self.socket = nil
       end
 
       def socket
-        if @socket
-          @socket = nil if reconnect_policy.reconnect? @socket
-        end
-
-        @socket ||= establish_connection
+        @socket ||= build_socket_proxy
       end
 
       def write(*arguments)
-        socket.write *arguments
+        connected do
+          socket.write *arguments
+        end
       end
 
       module Assertions
         def reconnects_after_close?
           close
 
-          reconnected = !socket.closed?
+          reconnected = connected do
+            !socket.closed?
+          end
 
           close
 
