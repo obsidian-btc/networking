@@ -45,20 +45,16 @@ module Networking
       end
 
       def close
-        connected do
-          socket.close
-        end
+        socket.close
       end
 
       def closed?
-        connected do
-          socket.closed?
-        end
+        socket.closed?
       end
 
       def connected(&block)
         if socket
-          reconnect if reconnect_policy.reconnect? socket
+          reconnect_policy.control_connection self
         end
 
         block.(socket)
@@ -115,6 +111,21 @@ module Networking
 
         def scheduler_configured?(expected_scheduler)
           socket.scheduler == expected_scheduler
+        end
+      end
+
+      class Substitute < Client
+        def self.build
+          reconnect_policy = ReconnectPolicy.get :never
+          scheduler = Scheduler::Substitute.build
+
+          instance = new '<substitute>', 0, reconnect_policy, scheduler
+          Telemetry::Logger.configure instance
+          instance
+        end
+
+        def establish_connection
+          StringIO.new
         end
       end
     end

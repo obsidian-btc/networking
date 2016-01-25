@@ -4,34 +4,43 @@ context 'Client Connection' do
   context 'Never reconnect policy' do
     policy = Networking::Connection::Client::ReconnectPolicy::Never.new
 
-    test 'Indicates a closed connection should not be reconnected' do
-      io = StringIO.new
-      io.close
+    test 'Does not re-establish a closed connection' do
+      connection = Networking::Connection::Client::Substitute.build
 
-      assert !policy.reconnect?(io)
+      connection.close
+
+      policy.control_connection connection
+
+      assert connection.closed?
     end
 
-    test 'Indicates an open connection should not be reconnected' do
-      io = StringIO.new
+    test 'Does not close an open connection' do
+      connection = Networking::Connection::Client::Substitute.build
 
-      assert !policy.reconnect?(io)
+      policy.control_connection connection
+
+      assert !connection.closed?
     end
   end
 
   context 'When Closed reconnect policy' do
     policy = Networking::Connection::Client::ReconnectPolicy::WhenClosed.new
 
-    test 'Indicates a closed connection should be reconnected' do
-      io = StringIO.new
-      io.close
+    test 'Re-establishes an open connection' do
+      connection = Networking::Connection::Client::Substitute.build
+      connection.close
 
-      assert policy.reconnect?(io)
+      policy.control_connection connection
+
+      assert !connection.closed?
     end
 
-    test 'Indicates an open connection should not be reconnected' do
-      io = StringIO.new
+    test 'Does not close an open connection' do
+      connection = Networking::Connection::Client::Substitute.build
 
-      assert !policy.reconnect?(io)
+      policy.control_connection connection
+
+      assert !connection.closed?
     end
   end
 

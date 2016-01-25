@@ -35,16 +35,17 @@ module Networking
         class Never
           include ReconnectPolicy
 
-          def reconnect?(_)
-            false
+          def control_connection(connection)
           end
         end
 
         class WhenClosed
           include ReconnectPolicy
 
-          def reconnect?(connection)
-            connection.closed?
+          def control_connection(connection)
+            if connection.closed?
+              connection.reconnect
+            end
           end
         end
 
