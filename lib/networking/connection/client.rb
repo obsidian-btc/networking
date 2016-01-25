@@ -5,21 +5,23 @@ module Networking
       attr_reader :port
       attr_reader :reconnect_policy
       attr_reader :scheduler
+      attr_reader :ssl_context
 
       dependency :logger, Telemetry::Logger
 
-      def initialize(host, port, reconnect_policy, scheduler)
+      def initialize(host, port, reconnect_policy, scheduler, ssl_context)
         @host = host
         @port = port
         @reconnect_policy = reconnect_policy
         @scheduler = scheduler
+        @ssl_context = ssl_context
       end
 
-      def self.build(host, port, reconnect_policy: nil, scheduler: nil)
+      def self.build(host, port, reconnect_policy: nil, scheduler: nil, ssl_context: nil)
         reconnect_policy ||= :never
         reconnect_policy = ReconnectPolicy.get reconnect_policy
 
-        instance = new host, port, reconnect_policy, scheduler
+        instance = new host, port, reconnect_policy, scheduler, ssl_context
         Telemetry::Logger.configure instance
         instance
       end
@@ -40,6 +42,12 @@ module Networking
         logger.trace "Establishing connection (Host: #{host.inspect}, Port: #{port})"
 
         socket = TCPSocket.new host, port
+        if ssl_context
+          logger.trace "Enabling SSL (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+          socket = OpenSSL::SSL::SSLSocket.new socket, ssl_context
+          socket.connect
+          logger.debug "SSL enabled (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+        end
         socket_proxy = SocketProxy.build socket, scheduler
 
         logger.trace "Established connection (Host: #{host.inspect}, Port: #{port})"

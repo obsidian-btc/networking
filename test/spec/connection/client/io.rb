@@ -2,7 +2,7 @@ require_relative './client_spec_init'
 
 context 'Client Connection' do
   host = Networking::Controls::Host::Localhost.example
-  port = Networking::Controls::Port.example
+  port = Networking::Controls::TestServer.port
 
   context 'I/O' do
     test 'Reading and writing' do

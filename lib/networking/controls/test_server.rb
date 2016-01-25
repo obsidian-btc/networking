@@ -35,7 +35,7 @@ module Networking
       def call
         loop do
           logger.trace 'Accepting a connection'
-          reads, * = select
+          reads, * = ::IO.select raw_sockets, [], [], poll_period
 
           if reads.nil?
             logger.debug 'No client has connected'
@@ -44,10 +44,9 @@ module Networking
 
           logger.debug "Client has connected (Count: #{reads.size})"
 
-          reads.each do |server_socket|
-            logger.trace 'Accepting client'
-            client = server_socket.accept
-            logger.debug "Accepted client (Type: #{client.class.name.inspect})"
+          reads.each do |raw_server_socket|
+            client = accept_socket raw_server_socket
+            next unless client
 
             handle_client client
 
@@ -81,32 +80,44 @@ module Networking
         logger.debug 'Client has closed the connection'
       end
 
-      def select
-        raw_sockets = server_sockets.map do |server_socket|
-          if server_socket.respond_to? :to_io
-            server_socket.to_io
-          else
-            server_socket
+      def accept_socket(raw_socket)
+        server_sockets.each do |server_socket|
+          if self.raw_socket(server_socket) == raw_socket
+            logger.trace "Accepting client connection (Server Socket: #{server_socket.class.name.inspect})"
+            client = server_socket.accept
+            logger.debug "Client connection accepted (Server Socket: #{server_socket.class.name.inspect}, Client Socket: #{client.class.name.inspect})"
+            return client
           end
         end
 
-        ::IO.select raw_sockets, [], [], poll_period
+        nil
+
+      rescue OpenSSL::SSL::SSLError
+        logger.warn 'OpenSSL::SSL::SSLError'
+        nil
+      end
+
+      def raw_socket(socket)
+        if socket.respond_to? :to_io
+          socket.to_io
+        else
+          socket
+        end
+      end
+
+      def raw_sockets
+        server_sockets.map do |server_socket|
+          raw_socket server_socket
+        end
       end
 
       def self.verify_running
         socket = TCPSocket.new '127.0.0.1', port
-
-        ssl_context = SSL::Context::Client.example
-        raw_ssl_socket = TCPSocket.new '127.0.0.1', ssl_port
-        ssl_socket = OpenSSL::SSL::SSLSocket.new raw_ssl_socket, ssl_context
+        socket.close
 
       rescue SocketError
         logger.error 'You must run the test server via `ruby lib/networking/controls/test_server/run.rb`'
         exit 1
-
-      ensure
-        socket.close if socket
-        raw_ssl_socket.close if raw_ssl_socket
       end
 
       def self.logger
