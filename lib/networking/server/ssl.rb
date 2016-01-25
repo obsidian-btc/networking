@@ -14,7 +14,6 @@ module Networking
       end
 
       def build_socket_proxy(raw_client_socket)
-        logger.focus 'hm'
         logger.trace "Building SSL socket (Fileno: #{fileno}, Client Fileno: #{Fileno.get raw_client_socket})"
         client_socket = OpenSSL::SSL::SSLSocket.new raw_client_socket, ssl_context
         logger.debug "Built SSL socket (Fileno: #{fileno}, Client Fileno: #{Fileno.get client_socket})"
