@@ -70,6 +70,10 @@ module Networking
         fail
       end
 
+      def io
+        socket.io
+      end
+
       def read(*arguments)
         connected do
           socket.read *arguments

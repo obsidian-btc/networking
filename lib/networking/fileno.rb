@@ -3,7 +3,7 @@ module Networking
     def self.get(io)
       case io
       when StringIO then '<stringio>'
-      when OpenSSL::SSL::SSLSocket then get io.to_io
+      when OpenSSL::SSL::SSLSocket, OpenSSL::SSL::SSLServer then get io.to_io
       else io.fileno
       end
     end
