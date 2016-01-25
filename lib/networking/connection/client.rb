@@ -124,8 +124,16 @@ module Networking
           instance
         end
 
-        def establish_connection
-          StringIO.new
+        def build_socket_proxy
+          SocketProxy::Substitute.build
+        end
+
+        def expect_read(data)
+          socket.expect_read data
+        end
+
+        def expect_write(data)
+          socket.expect_write data
         end
       end
     end
