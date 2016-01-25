@@ -21,6 +21,8 @@ module Networking
         reconnect_policy ||= :never
         reconnect_policy = ReconnectPolicy.get reconnect_policy
 
+        scheduler ||= Scheduler::Blocking.build
+
         instance = new host, port, reconnect_policy, scheduler, ssl_context
         Telemetry::Logger.configure instance
         instance
@@ -44,8 +46,20 @@ module Networking
         socket = TCPSocket.new host, port
         if ssl_context
           logger.trace "Enabling SSL (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
-          socket = OpenSSL::SSL::SSLSocket.new socket, ssl_context
-          socket.connect
+          raw_socket = socket
+          socket = OpenSSL::SSL::SSLSocket.new raw_socket, ssl_context
+
+          loop do
+            result = socket.connect_nonblock :exception => false
+            if result == :wait_readable
+              logger.trace "Not ready for SSL handshake; deferring (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+              scheduler.wait_readable raw_socket
+              logger.debug "Ready for SSL handshake (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+              next
+            end
+            break
+          end
+
           logger.debug "SSL enabled (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
         end
         socket_proxy = SocketProxy.build socket, scheduler
