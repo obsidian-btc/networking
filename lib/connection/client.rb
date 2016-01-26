@@ -44,13 +44,17 @@ class Connection
 
       socket = establish_connection
 
-      logger.opt_debug "Established connection (Host: #{host.inspect}, Port: #{port})"
+      logger.opt_debug "Established connection (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
 
       Connection.build socket, scheduler
     end
 
     def close
+      logger.opt_trace "Closing socket (Host: #{host.inspect}, Port: #{port}, Fileno: #{fileno})"
+
       socket.close
+
+      logger.opt_debug "Closed socket (Host: #{host.inspect}, Port: #{port})"
     end
 
     def closed?

@@ -32,7 +32,8 @@ class Connection
   end
 
   def close
-    socket.close
+    io.close
+    socket.close unless socket.closed?
   end
 
   def closed?
