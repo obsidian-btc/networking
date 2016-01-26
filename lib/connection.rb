@@ -10,7 +10,6 @@ require 'connection/fileno'
 
 require 'connection/scheduler'
 require 'connection/scheduler/blocking'
-require 'connection/scheduler/cooperative'
 require 'connection/scheduler/immediate'
 require 'connection/scheduler/substitute'
 
