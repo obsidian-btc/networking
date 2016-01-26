@@ -6,6 +6,7 @@ require 'stringio'
 
 require 'telemetry/logger'
 
+require 'connection/connection'
 require 'connection/fileno'
 
 require 'connection/scheduler'
