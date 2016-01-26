@@ -6,6 +6,6 @@ current_dir = Pathname.new __dir__
 path = root.join('init.rb').relative_path_from(current_dir)
 
 require_relative path
-require 'networking/controls'
+require 'connection/controls'
 
 Networking::Controls::TestServer.()

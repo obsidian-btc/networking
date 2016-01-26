@@ -8,4 +8,4 @@ require_relative '../init.rb'
 
 require 'test_bench'; TestBench.activate
 
-require 'networking/controls'
+require 'connection/controls'
