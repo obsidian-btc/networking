@@ -52,27 +52,22 @@ context 'Socket Proxy' do
       end
 
       test 'Interrupted by blocking reads' do
-        dispatcher = Connection::Controls::Scheduler::Cooperative::Dispatcher.new
-        scheduler = Connection::Scheduler::Cooperative.build dispatcher
+        scheduler = Connection::Controls::Scheduler::Programmable.new
 
         output = nil
 
         Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
           socket_proxy = Connection::SocketProxy.build read_io, scheduler
 
-          dispatcher.expect_read read_io do
+          scheduler.expect_blocking_read read_io do
             write_io.write data[0...1]
           end
-          dispatcher.expect_read read_io do
+          scheduler.expect_blocking_read read_io do
             write_io.write data[1..-1]
             write_io.close
           end
 
-          Connection::Controls::Scheduler::Cooperative::Fiber.run do
-            output = socket_proxy.read
-          end
-
-          dispatcher.verify
+          output = socket_proxy.read
         end
 
         assert output == data

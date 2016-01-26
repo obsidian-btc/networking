@@ -89,23 +89,18 @@ context 'Socket Proxy' do
 
     test 'Call would block' do
       data = Connection::Controls::Data::PlainText::SingleLine.example
-      dispatcher = Connection::Controls::Scheduler::Cooperative::Dispatcher.new
-      scheduler = Connection::Scheduler::Cooperative.build dispatcher
+      scheduler = Connection::Controls::Scheduler::Programmable.new
 
       output = nil
 
       Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
         socket_proxy = Connection::SocketProxy.build read_io, scheduler
 
-        dispatcher.expect_read read_io do
+        scheduler.expect_blocking_read read_io do
           write_io.write data
         end
 
-        Connection::Controls::Scheduler::Cooperative::Fiber.run do
-          output = socket_proxy.gets
-        end
-
-        dispatcher.verify
+        output = socket_proxy.gets
       end
 
       assert output == data
@@ -113,23 +108,18 @@ context 'Socket Proxy' do
 
     test 'After remote connection is closed' do
       data = Connection::Controls::Data::PlainText::SingleLine.example
-      dispatcher = Connection::Controls::Scheduler::Cooperative::Dispatcher.new
-      scheduler = Connection::Scheduler::Cooperative.build dispatcher
+      scheduler = Connection::Controls::Scheduler::Programmable.new
 
       output = :not_nil
 
       Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
         socket_proxy = Connection::SocketProxy.build read_io, scheduler
 
-        dispatcher.expect_read read_io do
+        scheduler.expect_blocking_read read_io do
           write_io.close
         end
 
-        Connection::Controls::Scheduler::Cooperative::Fiber.run do
-          output = socket_proxy.gets
-        end
-
-        dispatcher.verify
+        output = socket_proxy.gets
       end
 
       assert output.nil?

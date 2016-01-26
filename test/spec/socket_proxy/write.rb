@@ -15,8 +15,7 @@ context 'Socket Proxy' do
     end
 
     context 'Multiple writes are needed to fully write requested data' do
-      dispatcher = Connection::Controls::Scheduler::Cooperative::Dispatcher.new
-      scheduler = Connection::Scheduler::Cooperative.build dispatcher
+      scheduler = Connection::Controls::Scheduler::Programmable.new
       write_buffer_window_size = Connection::Controls::IO::Scenarios::WritesWillBlock.write_buffer_window_size
 
       output = nil
@@ -24,15 +23,11 @@ context 'Socket Proxy' do
       Connection::Controls::IO::Scenarios::WritesWillBlock.activate do |read_io, write_io|
         socket_proxy = Connection::SocketProxy.build write_io, scheduler
 
-        dispatcher.expect_write write_io do
+        scheduler.expect_blocking_write write_io do
           read_io.read write_buffer_window_size
         end
 
-        Connection::Controls::Scheduler::Cooperative::Fiber.run do
-          output = socket_proxy.write data
-        end
-
-        dispatcher.verify
+        output = socket_proxy.write data
       end
 
       assert output == data.bytesize
