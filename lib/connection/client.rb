@@ -34,11 +34,11 @@ module Connection
     end
 
     def build_socket_proxy
-      logger.trace "Establishing connection (Host: #{host.inspect}, Port: #{port})"
+      logger.opt_trace "Establishing connection (Host: #{host.inspect}, Port: #{port})"
 
       socket = establish_connection
 
-      logger.debug "Established connection (Host: #{host.inspect}, Port: #{port})"
+      logger.opt_debug "Established connection (Host: #{host.inspect}, Port: #{port})"
 
       SocketProxy.build socket, scheduler
     end

@@ -5,21 +5,21 @@ module Connection
     def wait_readable(io)
       fileno = Fileno.get io
 
-      logger.trace "Waiting for IO to become readable (Fileno: #{fileno})"
+      logger.opt_trace "Waiting for IO to become readable (Fileno: #{fileno})"
 
       block_read io
 
-      logger.debug "IO has become readable (Fileno: #{fileno})"
+      logger.opt_debug "IO has become readable (Fileno: #{fileno})"
     end
 
     def wait_writable(io)
       fileno = Fileno.get io
 
-      logger.trace "Waiting for IO to become writable (Fileno: #{fileno})"
+      logger.opt_trace "Waiting for IO to become writable (Fileno: #{fileno})"
 
       block_write io
 
-      logger.debug "IO has become writable (Fileno: #{fileno})"
+      logger.opt_debug "IO has become writable (Fileno: #{fileno})"
     end
 
     def configure_dependencies

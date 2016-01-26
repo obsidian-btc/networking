@@ -45,7 +45,7 @@ module Connection
     end
 
     def gets(separator_or_limit=$INPUT_RECORD_SEPARATOR, limit=nil)
-      logger.trace "Reading Line (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno})"
+      logger.opt_trace "Reading Line (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno})"
 
       line = nil
 
@@ -53,7 +53,7 @@ module Connection
         character = socket.read_nonblock 1, :exception => false
 
         if character == :wait_readable
-          logger.debug "Deferring gets; read would block (Fileno: #{fileno})"
+          logger.opt_debug "Deferring gets; read would block (Fileno: #{fileno})"
           scheduler.wait_readable io
           next
         elsif character.nil?
@@ -71,10 +71,10 @@ module Connection
       end
 
       if line
-        logger.debug "Read line (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno}, Bytes: #{line.bytesize})"
-        logger.data line
+        logger.opt_debug "Read line (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno}, Bytes: #{line.bytesize})"
+        logger.opt_data line
       else
-        logger.debug "Did not dead line; EOF reached (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno})"
+        logger.opt_debug "Did not dead line; EOF reached (Separator: #{separator_or_limit.inspect}, Bytes Requested: #{limit.inspect}, Fileno: #{fileno})"
       end
 
       line
@@ -86,24 +86,24 @@ module Connection
 
       read_size = bytes || read_buffer_size
 
-      logger.trace "Reading (Bytes Requested: #{bytes}, Fileno: #{fileno})"
+      logger.opt_trace "Reading (Bytes Requested: #{bytes}, Fileno: #{fileno})"
 
       loop do
-        logger.trace "Reading chunk (Max Size: #{read_size}, Fileno: #{fileno})"
+        logger.opt_trace "Reading chunk (Max Size: #{read_size}, Fileno: #{fileno})"
 
         data = socket.read_nonblock read_size, nil, :exception => false
 
         case data
         when :wait_readable then
-          logger.debug "Deferring chunk; read would block (Read Size: #{read_size}, Fileno: #{fileno})"
+          logger.opt_debug "Deferring chunk; read would block (Read Size: #{read_size}, Fileno: #{fileno})"
           scheduler.wait_readable io
           next
         when nil then
-          logger.debug "Read finished (Bytes Requested: #{bytes}, Fileno: #{fileno}, Bytes Read: #{outbuf.bytesize})"
+          logger.opt_debug "Read finished (Bytes Requested: #{bytes}, Fileno: #{fileno}, Bytes Read: #{outbuf.bytesize})"
           break
         else
-          logger.debug "Finished reading chunk (Max Size: #{read_size}, Fileno: #{fileno}, Bytes Read: #{data.bytesize})"
-          logger.data data
+          logger.opt_debug "Finished reading chunk (Max Size: #{read_size}, Fileno: #{fileno}, Bytes Read: #{data.bytesize})"
+          logger.opt_data data
 
           outbuf << data
         end
@@ -121,19 +121,19 @@ module Connection
     end
 
     def write(data)
-      logger.trace "Writing (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
-      logger.data data
+      logger.opt_trace "Writing (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
+      logger.opt_data data
 
       loop do
         bytes_written = socket.write_nonblock data, :exception => false
 
         if bytes_written == :wait_writable
-          logger.debug "Deferring write; write would block (Fileno: #{fileno})"
+          logger.opt_debug "Deferring write; write would block (Fileno: #{fileno})"
           scheduler.wait_writable io
           next
         end
 
-        logger.debug "Written (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
+        logger.opt_debug "Written (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
         return bytes_written
       end
     end

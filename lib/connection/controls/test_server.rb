@@ -12,7 +12,7 @@ module Connection
       end
 
       def self.build
-        logger.trace "Establishing server socket (Unencrypted Port: #{port}, SSL Port: #{ssl_port})"
+        logger.opt_trace "Establishing server socket (Unencrypted Port: #{port}, SSL Port: #{ssl_port})"
 
         server_socket = TCPServer.new '0.0.0.0', port
 
@@ -20,7 +20,7 @@ module Connection
         ssl_server_raw_socket = TCPServer.new '0.0.0.0', ssl_port
         ssl_server_socket = OpenSSL::SSL::SSLServer.new ssl_server_raw_socket, ssl_context
 
-        logger.debug "Server sockets established (Unencrypted Port: #{port}, SSL Port: #{ssl_port})"
+        logger.opt_debug "Server sockets established (Unencrypted Port: #{port}, SSL Port: #{ssl_port})"
 
         instance = new [server_socket, ssl_server_socket], poll_period
         Telemetry::Logger.configure instance
@@ -34,15 +34,15 @@ module Connection
 
       def call
         loop do
-          logger.trace 'Accepting a connection'
+          logger.opt_trace 'Accepting a connection'
           reads, * = ::IO.select raw_sockets, [], [], poll_period
 
           if reads.nil?
-            logger.debug 'No client has connected'
+            logger.opt_debug 'No client has connected'
             next
           end
 
-          logger.debug "Client has connected (Count: #{reads.size})"
+          logger.opt_debug "Client has connected (Count: #{reads.size})"
 
           reads.each do |raw_server_socket|
             client = accept_socket raw_server_socket
@@ -50,25 +50,25 @@ module Connection
 
             handle_client client
 
-            logger.trace 'Closing connection'
+            logger.opt_trace 'Closing connection'
             client.close
-            logger.debug 'Connection closed'
+            logger.opt_debug 'Connection closed'
           end
         end
       end
 
       def handle_client(client)
         loop do
-          logger.trace 'Reading message from client'
+          logger.opt_trace 'Reading message from client'
           line = client.readline
           iteration = line.to_i.abs
-          logger.debug "Message read from client (Line: #{line.inspect}, Iteration: #{iteration})"
+          logger.opt_debug "Message read from client (Line: #{line.inspect}, Iteration: #{iteration})"
 
           iteration -= 1
 
-          logger.trace "Writing reply to client (Iteration: #{iteration})"
+          logger.opt_trace "Writing reply to client (Iteration: #{iteration})"
           client.puts iteration.to_s
-          logger.debug "Wrote reply to client (Iteration: #{iteration})"
+          logger.opt_debug "Wrote reply to client (Iteration: #{iteration})"
 
           break if iteration.zero?
         end
@@ -77,15 +77,15 @@ module Connection
         logger.warn 'EOFError'
 
       rescue Errno::EPIPE, Errno::ECONNRESET, Errno::EPROTOTYPE
-        logger.debug 'Client has closed the connection'
+        logger.opt_debug 'Client has closed the connection'
       end
 
       def accept_socket(raw_socket)
         server_sockets.each do |server_socket|
           if self.raw_socket(server_socket) == raw_socket
-            logger.trace "Accepting client connection (Server Socket: #{server_socket.class.name.inspect})"
+            logger.opt_trace "Accepting client connection (Server Socket: #{server_socket.class.name.inspect})"
             client = server_socket.accept
-            logger.debug "Client connection accepted (Server Socket: #{server_socket.class.name.inspect}, Client Socket: #{client.class.name.inspect})"
+            logger.opt_debug "Client connection accepted (Server Socket: #{server_socket.class.name.inspect}, Client Socket: #{client.class.name.inspect})"
             return client
           end
         end

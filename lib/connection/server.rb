@@ -37,21 +37,21 @@ module Connection
     end
 
     def accept
-      logger.trace "Accepting connection (Fileno: #{fileno})"
+      logger.opt_trace "Accepting connection (Fileno: #{fileno})"
 
       begin
         client_socket = io.accept_nonblock
       rescue IO::WaitReadable
-        logger.debug "No connections available (Fileno: #{fileno})"
+        logger.opt_debug "No connections available (Fileno: #{fileno})"
 
-        logger.trace "Waiting for connection (Fileno: #{fileno})"
+        logger.opt_trace "Waiting for connection (Fileno: #{fileno})"
         scheduler.wait_readable io
-        logger.debug "Incoming connection arrived (Fileno: #{fileno})"
+        logger.opt_debug "Incoming connection arrived (Fileno: #{fileno})"
 
         retry
       end
 
-      logger.debug "Accepted connection (Fileno: #{fileno}, Client Fileno: #{Fileno.get client_socket})"
+      logger.opt_debug "Accepted connection (Fileno: #{fileno}, Client Fileno: #{Fileno.get client_socket})"
 
       build_socket_proxy client_socket
     end

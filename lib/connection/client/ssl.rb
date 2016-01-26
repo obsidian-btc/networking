@@ -10,24 +10,24 @@ module Connection
       end
 
       def enable_ssl(raw_socket)
-        logger.trace "Enabling SSL (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get raw_socket})"
+        logger.opt_trace "Enabling SSL (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get raw_socket})"
 
         socket = OpenSSL::SSL::SSLSocket.new raw_socket, ssl_context
 
         loop do
           result = socket.connect_nonblock :exception => false
           if result == :wait_readable
-            logger.trace "Not ready for SSL handshake; deferring (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+            logger.opt_trace "Not ready for SSL handshake; deferring (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
 
             scheduler.wait_readable raw_socket
 
-            logger.debug "Ready for SSL handshake (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+            logger.opt_debug "Ready for SSL handshake (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
             next
           end
           break
         end
 
-        logger.debug "SSL enabled (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
+        logger.opt_debug "SSL enabled (Host: #{host.inspect}, Port: #{port}, Fileno: #{Fileno.get socket})"
 
         socket
       end
