@@ -19,7 +19,7 @@ context 'Cooperative Scheduler' do
 
       assert dispatcher.verify
 
-      assert read_io do
+      assert read_io, Connection::Controls::UNIXSocket::Assertions do
         !read_would_block?
       end
     end
@@ -37,7 +37,7 @@ context 'Cooperative Scheduler' do
 
       assert dispatcher.verify
 
-      assert write_io do
+      assert write_io, Connection::Controls::UNIXSocket::Assertions do
         !write_would_block?
       end
     end

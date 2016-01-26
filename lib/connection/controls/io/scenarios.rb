@@ -18,7 +18,7 @@ class Connection
 
         module ReadsWillBlock
           def self.activate(&block)
-            UNIXSocketPair.activate do |read_io, write_io|
+            UNIXSocket.pair do |read_io, write_io|
               block.(read_io, write_io)
             end
           end
@@ -26,7 +26,7 @@ class Connection
 
         module WritesWillBlock
           def self.activate(&block)
-            UNIXSocketPair.activate do |read_io, write_io|
+            UNIXSocket.pair do |read_io, write_io|
               fill_write_buffer write_io
               block.(read_io, write_io)
             end
@@ -47,20 +47,6 @@ class Connection
             # sockets, this method should return the number of bytes that must
             # be read before the subsequent write will not block.
             2048
-          end
-        end
-
-        module UNIXSocketPair
-          def self.activate(&block)
-            read_io, write_io = UNIXSocket.pair
-
-            read_io.sync = true
-            read_io.close_write
-
-            write_io.sync = true
-            write_io.close_read
-
-            block.(read_io, write_io)
           end
         end
       end

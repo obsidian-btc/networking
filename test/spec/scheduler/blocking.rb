@@ -15,7 +15,7 @@ context 'Blocking Scheduler' do
 
       scheduler.wait_readable read_io
 
-      assert read_io do
+      assert read_io, Connection::Controls::UNIXSocket::Assertions do
         !read_would_block?
       end
 
@@ -31,7 +31,7 @@ context 'Blocking Scheduler' do
 
       scheduler.wait_writable write_io
 
-      assert write_io do
+      assert write_io, Connection::Controls::UNIXSocket::Assertions do
         !write_would_block?
       end
     end

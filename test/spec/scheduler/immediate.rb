@@ -7,7 +7,7 @@ context 'Immediate Scheduler' do
     Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |io, _|
       scheduler.wait_readable io
 
-      assert io do
+      assert io, Connection::Controls::UNIXSocket::Assertions do
         read_would_block?
       end
     end
@@ -17,7 +17,7 @@ context 'Immediate Scheduler' do
     Connection::Controls::IO::Scenarios::WritesWillBlock.activate do |_, io|
       scheduler.wait_writable io
 
-      assert io do
+      assert io, Connection::Controls::UNIXSocket::Assertions do
         write_would_block?
       end
     end
