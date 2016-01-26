@@ -7,12 +7,12 @@ module Connection
     attr_writer :socket
 
     dependency :logger, Telemetry::Logger
+    dependency :scheduler, Scheduler
 
-    def initialize(host, port, reconnect_policy, scheduler)
+    def initialize(host, port, reconnect_policy)
       @host = host
       @port = port
       @reconnect_policy = reconnect_policy
-      @scheduler = scheduler
     end
 
     def self.build(host, port, reconnect_policy: nil, scheduler: nil, ssl: nil)
@@ -22,11 +22,17 @@ module Connection
       scheduler ||= Scheduler::Blocking.build
 
       if ssl
-        instance = SSL.new host, port, reconnect_policy, scheduler
+        instance = SSL.new host, port, reconnect_policy
         instance.ssl_context = ssl if ssl.is_a? OpenSSL::SSL::SSLContext
         instance.ssl_context.verify_mode
       else
-        instance = NonSSL.new host, port, reconnect_policy, scheduler
+        instance = NonSSL.new host, port, reconnect_policy
+      end
+
+      if scheduler
+        instance.scheduler = scheduler
+      else
+        Scheduler.configure instance
       end
 
       Telemetry::Logger.configure instance

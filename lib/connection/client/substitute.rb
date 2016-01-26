@@ -3,9 +3,8 @@ module Connection
     class Substitute < Client
       def self.build
         reconnect_policy = ReconnectPolicy.get :never
-        scheduler = Scheduler::Substitute.build
 
-        instance = new '<substitute>', 0, reconnect_policy, scheduler
+        instance = new '<substitute>', 0, reconnect_policy
         Telemetry::Logger.configure instance
         instance
       end
