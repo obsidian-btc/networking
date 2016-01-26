@@ -120,6 +120,8 @@ class Connection
   end
 
   def write(data)
+    data = data.to_s
+
     logger.opt_trace "Writing (Bytes Requested: #{data.bytesize}, Fileno: #{fileno})"
     logger.opt_data data
 

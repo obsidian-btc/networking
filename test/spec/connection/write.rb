@@ -14,6 +14,17 @@ context 'Connection' do
       assert bytes_written == data.bytesize
     end
 
+    test 'Converts input data to a string' do
+      input = data.to_sym
+
+      io = Connection::Controls::IO::Writing.example
+      connection = Connection.build io
+
+      bytes_written = connection.write input
+
+      assert io.string == data
+    end
+
     context 'Multiple writes are needed to fully write requested data' do
       scheduler = Connection::Controls::Scheduler::Programmable.new
       write_buffer_window_size = Connection::Controls::IO::Scenarios::WritesWillBlock.write_buffer_window_size
