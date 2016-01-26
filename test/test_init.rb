@@ -10,3 +10,5 @@ require_relative '../init.rb'
 require 'test_bench'; TestBench.activate
 
 require 'connection/controls'
+
+Telemetry::Logger::AdHoc.activate
