@@ -4,7 +4,7 @@ context 'Client Substitute' do
   data = Connection::Controls::Data.example
 
   context 'Reading' do
-    connection = Connection::Connection::Client::Substitute.build
+    connection = Connection::Client::Substitute.build
     connection.expect_read data
 
     output = connection.read
@@ -13,14 +13,14 @@ context 'Client Substitute' do
   end
 
   context 'Writing' do
-    connection = Connection::Connection::Client::Substitute.build
+    connection = Connection::Client::Substitute.build
     connection.expect_write data
 
     connection.write data
   end
 
   context 'EOF' do
-    connection = Connection::Connection::Client::Substitute.build
+    connection = Connection::Client::Substitute.build
     connection.eof
 
     output = connection.gets

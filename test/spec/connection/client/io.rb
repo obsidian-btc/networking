@@ -7,7 +7,7 @@ context 'Client Connection' do
   context 'I/O' do
     test 'Reading and writing' do
       iteration = 1
-      client = Connection::Connection::Client.build host, port
+      client = Connection::Client.build host, port
 
       client.write "#{iteration}\n"
       response = client.read
@@ -17,7 +17,7 @@ context 'Client Connection' do
 
     test 'Reading a single line' do
       iteration = 2
-      client = Connection::Connection::Client.build host, port
+      client = Connection::Client.build host, port
 
       client.write "#{iteration}\n"
       response = client.gets

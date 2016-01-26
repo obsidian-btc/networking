@@ -1,61 +1,59 @@
 module Connection
-  module Connection
-    class Client
-      module ReconnectPolicy
-        def self.get(policy_name)
-          policy_class = self.policy_class policy_name
-          policy_class.new
+  class Client
+    module ReconnectPolicy
+      def self.get(policy_name)
+        policy_class = self.policy_class policy_name
+        policy_class.new
+      end
+
+      def self.logger
+        Telemetry::Logger.get self
+      end
+
+      def self.policy_class(policy_name=nil)
+        policy_name ||= Defaults::Name.get
+
+        policy_class = policies[policy_name]
+
+        unless policy_class
+          error_msg = "Refresh policy \"#{policy_name}\" is unknown. It must be one of: never or when_closed."
+          logger.error error_msg
+          raise Error, error_msg
         end
 
-        def self.logger
-          Telemetry::Logger.get self
+        policy_class
+      end
+
+      def self.policies
+        @policies ||= {
+          :never => Never,
+          :when_closed => WhenClosed
+        }
+      end
+
+      class Never
+        include ReconnectPolicy
+
+        def control_connection(connection)
         end
+      end
 
-        def self.policy_class(policy_name=nil)
-          policy_name ||= Defaults::Name.get
+      class WhenClosed
+        include ReconnectPolicy
 
-          policy_class = policies[policy_name]
-
-          unless policy_class
-            error_msg = "Refresh policy \"#{policy_name}\" is unknown. It must be one of: never or when_closed."
-            logger.error error_msg
-            raise Error, error_msg
-          end
-
-          policy_class
-        end
-
-        def self.policies
-          @policies ||= {
-            :never => Never,
-            :when_closed => WhenClosed
-          }
-        end
-
-        class Never
-          include ReconnectPolicy
-
-          def control_connection(connection)
-          end
-        end
-
-        class WhenClosed
-          include ReconnectPolicy
-
-          def control_connection(connection)
-            if connection.closed?
-              connection.reconnect
-            end
+        def control_connection(connection)
+          if connection.closed?
+            connection.reconnect
           end
         end
+      end
 
-        Error = Class.new StandardError
+      Error = Class.new StandardError
 
-        module Defaults
-          module Name
-            def self.get
-              :never
-            end
+      module Defaults
+        module Name
+          def self.get
+            :never
           end
         end
       end

@@ -8,7 +8,7 @@ context 'Client Connection' do
   context 'SSL' do
     test 'Reading and writing' do
       iteration = 1
-      client = Connection::Connection::Client.build host, port, ssl: ssl_context
+      client = Connection::Client.build host, port, ssl: ssl_context
 
       client.write "#{iteration}\n"
       response = client.read

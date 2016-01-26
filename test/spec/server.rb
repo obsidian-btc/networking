@@ -48,7 +48,7 @@ context 'Server' do
     client_context = Connection::Controls::SSL::Context::Client.example
 
     test 'Accepting a connection' do
-      client = Connection::Connection::Client.build host, port, :ssl => client_context
+      client = Connection::Client.build host, port, :ssl => client_context
       server = Connection::Server.build port, :ssl_context => server_context
 
       output = nil
