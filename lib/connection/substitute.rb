@@ -53,6 +53,10 @@ class Connection
       @expectations ||= []
     end
 
+    def fileno
+      Fileno.get self
+    end
+
     def read(*arguments)
       output = current_expectation.read *arguments
       expectations.shift if current_expectation.eof?

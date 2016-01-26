@@ -15,9 +15,9 @@ class Connection
       @reconnect_policy = reconnect_policy
     end
 
-    def self.build(host, port, reconnect_policy: nil, scheduler: nil, ssl: nil)
-      reconnect_policy ||= :never
-      reconnect_policy = ReconnectPolicy.get reconnect_policy
+    def self.build(host, port, reconnect: nil, scheduler: nil, ssl: nil)
+      reconnect ||= :never
+      reconnect_policy = ReconnectPolicy.get reconnect
 
       scheduler ||= Scheduler::Blocking.build
 
@@ -73,6 +73,10 @@ class Connection
 
     def establish_connection
       fail
+    end
+
+    def fileno
+      socket.fileno
     end
 
     def io

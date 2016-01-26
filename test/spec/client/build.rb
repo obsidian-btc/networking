@@ -15,7 +15,7 @@ context 'Client Connection' do
       end
 
       test 'Setting policy to WhenClosed' do
-        client = Connection::Client.build host, port, :reconnect_policy => :when_closed
+        client = Connection::Client.build host, port, :reconnect => :when_closed
 
         assert client do
           reconnects_after_close?

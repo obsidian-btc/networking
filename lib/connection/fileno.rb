@@ -4,7 +4,13 @@ class Connection
       case io
       when StringIO then '<stringio>'
       when OpenSSL::SSL::SSLSocket, OpenSSL::SSL::SSLServer then get io.to_io
-      else io.fileno
+      when Connection::Substitute then '<substitute>'
+      else
+        if io.closed?
+          '<closed>'
+        else
+          io.fileno
+        end
       end
     end
   end
