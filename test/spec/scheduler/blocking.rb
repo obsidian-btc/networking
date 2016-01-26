@@ -1,15 +1,15 @@
 require_relative './scheduler_spec_init'
 
 context 'Blocking Scheduler' do
-  timeout = Networking::Controls::IO::Timeout.short
-  octet = Networking::Controls::IO::Octet.example
-  write_buffer_window_size = Networking::Controls::IO::Scenarios::WritesWillBlock.write_buffer_window_size
+  timeout = Connection::Controls::IO::Timeout.short
+  octet = Connection::Controls::IO::Octet.example
+  write_buffer_window_size = Connection::Controls::IO::Scenarios::WritesWillBlock.write_buffer_window_size
 
-  scheduler = Networking::Scheduler::Blocking.build timeout
+  scheduler = Connection::Scheduler::Blocking.build timeout
 
   test 'Scheduling a read' do
-    Networking::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
-      thread = Networking::Controls::IO::Scenarios::DeferViaThread.(timeout * 2) do
+    Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
+      thread = Connection::Controls::IO::Scenarios::DeferViaThread.(timeout * 2) do
         write_io.write octet
       end
 
@@ -24,8 +24,8 @@ context 'Blocking Scheduler' do
   end
 
   test 'Scheduling a write' do
-    Networking::Controls::IO::Scenarios::WritesWillBlock.activate do |read_io, write_io|
-      thread = Networking::Controls::IO::Scenarios::DeferViaThread.(timeout * 2) do
+    Connection::Controls::IO::Scenarios::WritesWillBlock.activate do |read_io, write_io|
+      thread = Connection::Controls::IO::Scenarios::DeferViaThread.(timeout * 2) do
          read_io.read write_buffer_window_size
       end
 

@@ -1,4 +1,4 @@
-module Networking
+module Connection
   module Controls
     class TestServer
       attr_reader :poll_period

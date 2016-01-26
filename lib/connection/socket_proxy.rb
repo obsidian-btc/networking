@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class SocketProxy
     attr_reader :io
     attr_reader :read_buffer_size

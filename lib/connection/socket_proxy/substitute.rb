@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class SocketProxy
     class Substitute
       dependency :logger, Telemetry::Logger

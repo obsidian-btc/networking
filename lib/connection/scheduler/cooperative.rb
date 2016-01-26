@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class Scheduler
     class Cooperative < Scheduler
       attr_reader :dispatcher

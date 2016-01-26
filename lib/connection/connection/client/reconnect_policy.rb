@@ -1,4 +1,4 @@
-module Networking
+module Connection
   module Connection
     class Client
       module ReconnectPolicy

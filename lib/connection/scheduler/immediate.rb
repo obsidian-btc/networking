@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class Scheduler
     class Immediate < Scheduler
       def self.build

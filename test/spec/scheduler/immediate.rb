@@ -1,10 +1,10 @@
 require_relative './scheduler_spec_init'
 
 context 'Immediate Scheduler' do
-  scheduler = Networking::Scheduler::Immediate.new
+  scheduler = Connection::Scheduler::Immediate.new
 
   test 'Scheduling a read' do
-    Networking::Controls::IO::Scenarios::ReadsWillBlock.activate do |io, _|
+    Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |io, _|
       scheduler.wait_readable io
 
       assert io do
@@ -14,7 +14,7 @@ context 'Immediate Scheduler' do
   end
 
   test 'Scheduling a write' do
-    Networking::Controls::IO::Scenarios::WritesWillBlock.activate do |_, io|
+    Connection::Controls::IO::Scenarios::WritesWillBlock.activate do |_, io|
       scheduler.wait_writable io
 
       assert io do

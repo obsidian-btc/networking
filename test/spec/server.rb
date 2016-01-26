@@ -1,10 +1,10 @@
 context 'Server' do
-  data = Networking::Controls::Data.example
-  port = Networking::Controls::Port.example
-  host = Networking::Controls::Host::Localhost.example
+  data = Connection::Controls::Data.example
+  port = Connection::Controls::Port.example
+  host = Connection::Controls::Host::Localhost.example
 
   test 'Accepting a connection' do
-    server = Networking::Server.build port
+    server = Connection::Server.build port
 
     client = TCPSocket.new host, port
 
@@ -27,8 +27,8 @@ context 'Server' do
   end
 
   test 'Setting scheduler on client' do
-    scheduler = Networking::Scheduler::Immediate.build
-    server = Networking::Server.build port, :scheduler => scheduler
+    scheduler = Connection::Scheduler::Immediate.build
+    server = Connection::Server.build port, :scheduler => scheduler
 
     client = TCPSocket.new host, port
 
@@ -44,12 +44,12 @@ context 'Server' do
   end
 
   context 'SSL' do
-    server_context = Networking::Controls::SSL::Context::Server.example
-    client_context = Networking::Controls::SSL::Context::Client.example
+    server_context = Connection::Controls::SSL::Context::Server.example
+    client_context = Connection::Controls::SSL::Context::Client.example
 
     test 'Accepting a connection' do
-      client = Networking::Connection::Client.build host, port, :ssl => client_context
-      server = Networking::Server.build port, :ssl_context => server_context
+      client = Connection::Connection::Client.build host, port, :ssl => client_context
+      server = Connection::Server.build port, :ssl_context => server_context
 
       output = nil
 

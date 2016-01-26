@@ -1,14 +1,14 @@
 require_relative './client_spec_init'
 
 context 'Client Connection' do
-  host = Networking::Controls::Host::Localhost.example
-  port = Networking::Controls::TestServer.ssl_port
-  ssl_context = Networking::Controls::SSL::Context::Client.example
+  host = Connection::Controls::Host::Localhost.example
+  port = Connection::Controls::TestServer.ssl_port
+  ssl_context = Connection::Controls::SSL::Context::Client.example
 
   context 'SSL' do
     test 'Reading and writing' do
       iteration = 1
-      client = Networking::Connection::Client.build host, port, ssl: ssl_context
+      client = Connection::Connection::Client.build host, port, ssl: ssl_context
 
       client.write "#{iteration}\n"
       response = client.read

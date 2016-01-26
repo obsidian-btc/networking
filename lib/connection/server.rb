@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class Server
     attr_reader :socket
 

@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class Scheduler
     dependency :logger, Telemetry::Logger
 

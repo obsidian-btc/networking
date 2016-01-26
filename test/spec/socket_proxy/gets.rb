@@ -5,11 +5,11 @@ context 'Socket Proxy' do
 
   context 'Reading a line of text (gets)' do
     test do
-      data = Networking::Controls::Data::PlainText::MultipleLines.example
+      data = Connection::Controls::Data::PlainText::MultipleLines.example
       first_line = data.each_line.first
-      io = Networking::Controls::IO::Reading.example data
+      io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       output = socket_proxy.gets
 
@@ -17,10 +17,10 @@ context 'Socket Proxy' do
     end
 
     test 'Separator defaults to input record separator ($/) when not set' do
-      data = Networking::Controls::Data::PlainText::MultipleLines.example "\r"
-      io = Networking::Controls::IO::Reading.example data
+      data = Connection::Controls::Data::PlainText::MultipleLines.example "\r"
+      io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       output = socket_proxy.gets
 
@@ -28,10 +28,10 @@ context 'Socket Proxy' do
     end
 
     test 'Separator explicitly set to nil causes a full read through EOF' do
-      data = Networking::Controls::Data::PlainText::MultipleLines.example
-      io = Networking::Controls::IO::Reading.example data
+      data = Connection::Controls::Data::PlainText::MultipleLines.example
+      io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       output = socket_proxy.gets nil
 
@@ -39,11 +39,11 @@ context 'Socket Proxy' do
     end
 
     test 'Zero length separator ("") splits on paragraphs' do
-      data = Networking::Controls::Data::PlainText::MultipleLines.example "\n\n"
+      data = Connection::Controls::Data::PlainText::MultipleLines.example "\n\n"
       first_line = data.each_line("\n\n").first
-      io = Networking::Controls::IO::Reading.example data
+      io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       output = socket_proxy.gets ''
 
@@ -51,10 +51,10 @@ context 'Socket Proxy' do
     end
 
     test 'Byte limit is specified and separator is not' do
-      data = Networking::Controls::Data::PlainText::SingleLine.example
-      io = Networking::Controls::IO::Reading.example data
+      data = Connection::Controls::Data::PlainText::SingleLine.example
+      io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       output = socket_proxy.gets 1
 
@@ -63,12 +63,12 @@ context 'Socket Proxy' do
 
     context 'Byte limit and separator are both specified' do
       separator = "\r"
-      data = Networking::Controls::Data::PlainText::MultipleLines.example separator
+      data = Connection::Controls::Data::PlainText::MultipleLines.example separator
 
       test 'Byte limit is reached first' do
-        io = Networking::Controls::IO::Reading.example data
+        io = Connection::Controls::IO::Reading.example data
 
-        socket_proxy = Networking::SocketProxy.build io
+        socket_proxy = Connection::SocketProxy.build io
 
         output = socket_proxy.gets separator, 1
 
@@ -77,9 +77,9 @@ context 'Socket Proxy' do
 
       test 'Separator is reached first' do
         first_line = data.each_line(separator).first
-        io = Networking::Controls::IO::Reading.example data
+        io = Connection::Controls::IO::Reading.example data
 
-        socket_proxy = Networking::SocketProxy.build io
+        socket_proxy = Connection::SocketProxy.build io
 
         output = socket_proxy.gets separator, data.bytesize
 
@@ -88,20 +88,20 @@ context 'Socket Proxy' do
     end
 
     test 'Call would block' do
-      data = Networking::Controls::Data::PlainText::SingleLine.example
-      dispatcher = Networking::Controls::Scheduler::Cooperative::Dispatcher.new
-      scheduler = Networking::Scheduler::Cooperative.build dispatcher
+      data = Connection::Controls::Data::PlainText::SingleLine.example
+      dispatcher = Connection::Controls::Scheduler::Cooperative::Dispatcher.new
+      scheduler = Connection::Scheduler::Cooperative.build dispatcher
 
       output = nil
 
-      Networking::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
-        socket_proxy = Networking::SocketProxy.build read_io, scheduler
+      Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
+        socket_proxy = Connection::SocketProxy.build read_io, scheduler
 
         dispatcher.expect_read read_io do
           write_io.write data
         end
 
-        Networking::Controls::Scheduler::Cooperative::Fiber.run do
+        Connection::Controls::Scheduler::Cooperative::Fiber.run do
           output = socket_proxy.gets
         end
 
@@ -112,20 +112,20 @@ context 'Socket Proxy' do
     end
 
     test 'After remote connection is closed' do
-      data = Networking::Controls::Data::PlainText::SingleLine.example
-      dispatcher = Networking::Controls::Scheduler::Cooperative::Dispatcher.new
-      scheduler = Networking::Scheduler::Cooperative.build dispatcher
+      data = Connection::Controls::Data::PlainText::SingleLine.example
+      dispatcher = Connection::Controls::Scheduler::Cooperative::Dispatcher.new
+      scheduler = Connection::Scheduler::Cooperative.build dispatcher
 
       output = :not_nil
 
-      Networking::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
-        socket_proxy = Networking::SocketProxy.build read_io, scheduler
+      Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
+        socket_proxy = Connection::SocketProxy.build read_io, scheduler
 
         dispatcher.expect_read read_io do
           write_io.close
         end
 
-        Networking::Controls::Scheduler::Cooperative::Fiber.run do
+        Connection::Controls::Scheduler::Cooperative::Fiber.run do
           output = socket_proxy.gets
         end
 
@@ -138,10 +138,10 @@ context 'Socket Proxy' do
 
   context 'readline variation' do
     test do
-      data = Networking::Controls::Data::PlainText::SingleLine.example
-      io = Networking::Controls::IO::Reading.example data
+      data = Connection::Controls::Data::PlainText::SingleLine.example
+      io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       output = socket_proxy.readline
 
@@ -151,7 +151,7 @@ context 'Socket Proxy' do
     test 'EOFError is raised after remote connection is closed' do
       io = StringIO.new
 
-      socket_proxy = Networking::SocketProxy.build io
+      socket_proxy = Connection::SocketProxy.build io
 
       begin
         socket_proxy.readline

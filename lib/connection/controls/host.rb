@@ -1,4 +1,4 @@
-module Networking
+module Connection
   module Controls
     module Host
       def self.example

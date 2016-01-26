@@ -1,4 +1,4 @@
-module Networking
+module Connection
   class Server
     class SSL < Server
       attr_reader :ssl_context

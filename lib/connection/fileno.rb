@@ -1,4 +1,4 @@
-module Networking
+module Connection
   module Fileno
     def self.get(io)
       case io

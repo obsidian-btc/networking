@@ -8,4 +8,4 @@ path = root.join('init.rb').relative_path_from(current_dir)
 require_relative path
 require 'connection/controls'
 
-Networking::Controls::TestServer.()
+Connection::Controls::TestServer.()
