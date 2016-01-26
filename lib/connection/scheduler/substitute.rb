@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Scheduler
     module Substitute
       def self.build

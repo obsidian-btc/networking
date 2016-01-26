@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Client
     class SSL < Client
       attr_writer :ssl_context

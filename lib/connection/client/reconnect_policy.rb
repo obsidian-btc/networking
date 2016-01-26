@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Client
     module ReconnectPolicy
       def self.get(policy_name)

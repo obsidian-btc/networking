@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Scheduler
     class Blocking < Scheduler
       attr_reader :timeout

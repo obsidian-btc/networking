@@ -1,4 +1,4 @@
-module Connection
+class Connection
   module Controls
     module Port
       def self.example

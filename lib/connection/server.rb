@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Server
     attr_reader :socket
 
@@ -53,15 +53,15 @@ module Connection
 
       logger.opt_debug "Accepted connection (Fileno: #{fileno}, Client Fileno: #{Fileno.get client_socket})"
 
-      build_socket_proxy client_socket
+      build_connection client_socket
     end
 
     def accept_socket
       socket.accept_nonblock
     end
 
-    def build_socket_proxy(client_socket)
-      SocketProxy.build client_socket, scheduler
+    def build_connection(client_socket)
+      Connection.build client_socket, scheduler
     end
 
     def close

@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Client
     attr_reader :host
     attr_reader :port
@@ -39,14 +39,14 @@ module Connection
       instance
     end
 
-    def build_socket_proxy
+    def build_connection
       logger.opt_trace "Establishing connection (Host: #{host.inspect}, Port: #{port})"
 
       socket = establish_connection
 
       logger.opt_debug "Established connection (Host: #{host.inspect}, Port: #{port})"
 
-      SocketProxy.build socket, scheduler
+      Connection.build socket, scheduler
     end
 
     def close
@@ -96,7 +96,7 @@ module Connection
     end
 
     def socket
-      @socket ||= build_socket_proxy
+      @socket ||= build_connection
     end
 
     def write(*arguments)

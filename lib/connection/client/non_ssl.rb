@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Client
     class NonSSL < Client
       def establish_connection

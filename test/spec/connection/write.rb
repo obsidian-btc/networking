@@ -1,14 +1,14 @@
-require_relative './socket_proxy_spec_init'
+require_relative './connection_spec_init'
 
-context 'Socket Proxy' do
+context 'Connection' do
   context 'Writing' do
     data = Connection::Controls::Data.example
 
     test 'Single write transmits all the requested data' do
       io = Connection::Controls::IO::Writing.example
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      bytes_written = socket_proxy.write data
+      bytes_written = connection.write data
 
       assert io.string == data
       assert bytes_written == data.bytesize
@@ -21,13 +21,13 @@ context 'Socket Proxy' do
       output = nil
 
       Connection::Controls::IO::Scenarios::WritesWillBlock.activate do |read_io, write_io|
-        socket_proxy = Connection::SocketProxy.build write_io, scheduler
+        connection = Connection.build write_io, scheduler
 
         scheduler.expect_blocking_write write_io do
           read_io.read write_buffer_window_size
         end
 
-        output = socket_proxy.write data
+        output = connection.write data
       end
 
       assert output == data.bytesize

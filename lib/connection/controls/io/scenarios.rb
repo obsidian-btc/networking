@@ -1,4 +1,4 @@
-module Connection
+class Connection
   module Controls
     module IO
       module Scenarios

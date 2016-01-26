@@ -1,23 +1,23 @@
-require_relative './socket_proxy_spec_init'
+require_relative './connection_spec_init'
 
-context 'Socket Proxy' do
+context 'Connection' do
   context 'Writing' do
     data = Connection::Controls::Data.example
 
     test 'Read until end of file is reached' do
       io = Connection::Controls::IO::Reading.example data
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.read
+      output = connection.read
 
       assert output == data
     end
 
     test 'Read a specific amount of data' do
       io = Connection::Controls::IO::Reading.example data
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.read 4
+      output = connection.read 4
 
       assert output == data[0...4]
     end
@@ -25,18 +25,18 @@ context 'Socket Proxy' do
     test 'Read data into an output buffer' do
       io = Connection::Controls::IO::Reading.example data
       buffer = ''
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      socket_proxy.read nil, buffer
+      connection.read nil, buffer
 
       assert buffer == data
     end
 
     test 'Data is read as ASCII-8BIT (binary)' do
       io = Connection::Controls::IO::Reading.example data
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.read
+      output = connection.read
 
       assert output.encoding.name == 'ASCII-8BIT'
     end
@@ -44,9 +44,9 @@ context 'Socket Proxy' do
     context 'Multiple fixed size reads are needed to fully read to EOF' do
       test 'Data exceeds read buffer size' do
         io = Connection::Controls::IO::Reading.example data
-        socket_proxy = Connection::SocketProxy.new io, io, 4
+        connection = Connection.new io, io, 4
 
-        output = socket_proxy.read
+        output = connection.read
 
         assert output == data
       end
@@ -57,7 +57,7 @@ context 'Socket Proxy' do
         output = nil
 
         Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
-          socket_proxy = Connection::SocketProxy.build read_io, scheduler
+          connection = Connection.build read_io, scheduler
 
           scheduler.expect_blocking_read read_io do
             write_io.write data[0...1]
@@ -67,7 +67,7 @@ context 'Socket Proxy' do
             write_io.close
           end
 
-          output = socket_proxy.read
+          output = connection.read
         end
 
         assert output == data

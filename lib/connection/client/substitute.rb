@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Client
     class Substitute < Client
       def self.build
@@ -9,8 +9,8 @@ module Connection
         instance
       end
 
-      def build_socket_proxy
-        SocketProxy::Substitute.build
+      def build_connection
+        Connection::Substitute.build
       end
 
       def eof

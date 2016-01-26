@@ -1,6 +1,6 @@
-require_relative './socket_proxy_spec_init'
+require_relative './connection_spec_init'
 
-context 'Socket Proxy' do
+context 'Connection' do
   assert $INPUT_RECORD_SEPARATOR == "\n"
 
   context 'Reading a line of text (gets)' do
@@ -9,9 +9,9 @@ context 'Socket Proxy' do
       first_line = data.each_line.first
       io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.gets
+      output = connection.gets
 
       assert output == first_line
     end
@@ -20,9 +20,9 @@ context 'Socket Proxy' do
       data = Connection::Controls::Data::PlainText::MultipleLines.example "\r"
       io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.gets
+      output = connection.gets
 
       assert output == data
     end
@@ -31,9 +31,9 @@ context 'Socket Proxy' do
       data = Connection::Controls::Data::PlainText::MultipleLines.example
       io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.gets nil
+      output = connection.gets nil
 
       assert output == data
     end
@@ -43,9 +43,9 @@ context 'Socket Proxy' do
       first_line = data.each_line("\n\n").first
       io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.gets ''
+      output = connection.gets ''
 
       assert output == first_line
     end
@@ -54,9 +54,9 @@ context 'Socket Proxy' do
       data = Connection::Controls::Data::PlainText::SingleLine.example
       io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.gets 1
+      output = connection.gets 1
 
       assert output == data[0]
     end
@@ -68,9 +68,9 @@ context 'Socket Proxy' do
       test 'Byte limit is reached first' do
         io = Connection::Controls::IO::Reading.example data
 
-        socket_proxy = Connection::SocketProxy.build io
+        connection = Connection.build io
 
-        output = socket_proxy.gets separator, 1
+        output = connection.gets separator, 1
 
         assert output == data[0]
       end
@@ -79,9 +79,9 @@ context 'Socket Proxy' do
         first_line = data.each_line(separator).first
         io = Connection::Controls::IO::Reading.example data
 
-        socket_proxy = Connection::SocketProxy.build io
+        connection = Connection.build io
 
-        output = socket_proxy.gets separator, data.bytesize
+        output = connection.gets separator, data.bytesize
 
         assert output == first_line
       end
@@ -94,13 +94,13 @@ context 'Socket Proxy' do
       output = nil
 
       Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
-        socket_proxy = Connection::SocketProxy.build read_io, scheduler
+        connection = Connection.build read_io, scheduler
 
         scheduler.expect_blocking_read read_io do
           write_io.write data
         end
 
-        output = socket_proxy.gets
+        output = connection.gets
       end
 
       assert output == data
@@ -113,13 +113,13 @@ context 'Socket Proxy' do
       output = :not_nil
 
       Connection::Controls::IO::Scenarios::ReadsWillBlock.activate do |read_io, write_io|
-        socket_proxy = Connection::SocketProxy.build read_io, scheduler
+        connection = Connection.build read_io, scheduler
 
         scheduler.expect_blocking_read read_io do
           write_io.close
         end
 
-        output = socket_proxy.gets
+        output = connection.gets
       end
 
       assert output.nil?
@@ -131,9 +131,9 @@ context 'Socket Proxy' do
       data = Connection::Controls::Data::PlainText::SingleLine.example
       io = Connection::Controls::IO::Reading.example data
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
-      output = socket_proxy.readline
+      output = connection.readline
 
       assert output == data
     end
@@ -141,10 +141,10 @@ context 'Socket Proxy' do
     test 'EOFError is raised after remote connection is closed' do
       io = StringIO.new
 
-      socket_proxy = Connection::SocketProxy.build io
+      connection = Connection.build io
 
       begin
-        socket_proxy.readline
+        connection.readline
       rescue EOFError => error
       end
 

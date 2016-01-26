@@ -1,4 +1,4 @@
-module Connection
+class Connection
   class Server
     class SSL < Server
       attr_reader :ssl_context
@@ -13,7 +13,7 @@ module Connection
         super
       end
 
-      def build_socket_proxy(raw_client_socket)
+      def build_connection(raw_client_socket)
         logger.opt_trace "Building SSL socket (Fileno: #{fileno}, Client Fileno: #{Fileno.get raw_client_socket})"
         client_socket = OpenSSL::SSL::SSLSocket.new raw_client_socket, ssl_context
         logger.opt_debug "Built SSL socket (Fileno: #{fileno}, Client Fileno: #{Fileno.get client_socket})"
@@ -34,7 +34,7 @@ module Connection
 
         logger.opt_debug "Performed SSL handshake (Fileno: #{fileno}, Client Fileno: #{Fileno.get client_socket})"
 
-        SocketProxy.build client_socket, scheduler
+        Connection.build client_socket, scheduler
       end
 
       def io
